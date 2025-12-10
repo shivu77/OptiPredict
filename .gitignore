@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# OS/IDE
+.DS_Store
+.vscode/
+
+# Data and outputs
+data/
+project/outputs/
+project/logs/
+
+# Models and large artifacts
+project/models/*.pth
+project/real_esrgan/weights/
+
+# Notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Misc
+*.tmp
+*.log
