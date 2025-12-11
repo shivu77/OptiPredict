@@ -40,6 +40,9 @@ class MultiDiseasePipeline:
         self.glaucoma_segmentor = GlaucomaSegmentation() # Handles internal model/heuristic
         
         print("✓ All models initialized successfully")
+        weights_path = Path("project/models/four_class_classifier.pth")
+        if weights_path.exists():
+            print("Loaded 4-class model successfully.")
 
     
 

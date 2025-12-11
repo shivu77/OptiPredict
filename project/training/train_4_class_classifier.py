@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms, models
 
 DATASET_DIR = Path("project/datasets/balanced_dataset")
+FALLBACK_DATASET_ABS = Path(r"C:\Users\Rahul\OneDrive\Desktop\Optic\project\datasets\balanced_dataset")
 MODEL_DIR = Path("project/models")
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 WEIGHTS_PATH = MODEL_DIR / "four_class_classifier.pth"
@@ -57,17 +58,21 @@ def accuracy(outputs, targets):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", type=int, default=6)
-    parser.add_argument("--batch_size", type=int, default=16)
-    parser.add_argument("--arch", type=str, default="resnet18")
+    parser.add_argument("--epochs", type=int, default=15)
+    parser.add_argument("--batch_size", type=int, default=32)
+    parser.add_argument("--arch", type=str, default="efficientnet_b0", choices=["efficientnet_b0", "resnet18"])
     parser.add_argument("--workers", type=int, default=2)
+    parser.add_argument("--data_root", type=str, default=None)
     args = parser.parse_args()
-    if not DATASET_DIR.exists():
-        print("X Balanced dataset not found at", DATASET_DIR)
+    dataset_dir = Path(args.data_root) if args.data_root else DATASET_DIR
+    if not dataset_dir.exists() and FALLBACK_DATASET_ABS.exists():
+        dataset_dir = FALLBACK_DATASET_ABS
+    if not dataset_dir.exists():
+        print("X Balanced dataset not found at", dataset_dir)
         return
-    base_dataset = datasets.ImageFolder(DATASET_DIR)
+    base_dataset = datasets.ImageFolder(dataset_dir)
     if len(base_dataset.classes) < 4:
-        print("X Balanced dataset missing classes", dataset.classes)
+        print("X Balanced dataset missing classes", base_dataset.classes)
         return
     n = len(base_dataset)
     val_n = max(1, int(0.2 * n))
@@ -75,8 +80,8 @@ def main():
     indices = torch.randperm(n).tolist()
     train_indices = indices[:train_n]
     val_indices = indices[train_n:]
-    train_dataset = datasets.ImageFolder(DATASET_DIR, transform=train_tf)
-    val_dataset = datasets.ImageFolder(DATASET_DIR, transform=val_tf)
+    train_dataset = datasets.ImageFolder(dataset_dir, transform=train_tf)
+    val_dataset = datasets.ImageFolder(dataset_dir, transform=val_tf)
     train_ds = Subset(train_dataset, train_indices)
     val_ds = Subset(val_dataset, val_indices)
     pin_memory = torch.cuda.is_available()
